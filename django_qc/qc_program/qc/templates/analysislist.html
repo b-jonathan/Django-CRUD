@@ -1,0 +1,205 @@
+{% extends "master.html" %}
+
+{% block title %}
+  List of complains
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+  <h5 class="mx-4">Filter</h5>
+  <form id="filterdate" name="filterdate" action="">
+    <div class="form-group row">
+      <label for="startdate" class="col-sm-2 offset-1 col-form-label">Periodic:</label> 
+      <label for="startdate" class="col-sm-2 offset-1 col-form-label">Start Date:</label> 
+      <label for="enddate" class="col-sm-2 offset-1 col-form-label">End Date:</label> 
+    </div>
+    <div class="form-group row">
+      <div class="col-sm-2 offset-1">
+        <select class="form-select" name="periodic" id="periodic" class="form-control">
+          <option value=" ">None</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="col-sm-2 offset-1">
+        <input type="date" name="startdate" id="startdate" class="form-control">
+      </div>
+      <div class="col-sm-2 offset-1">
+        <input type="date" name="enddate" id="enddate" class="form-control">
+      </div>
+      <div class="col-sm-2 offset-1">
+        <button type="submit" class="btn btn-success">Filter</button>
+      </div>
+    </div>
+  </form>
+</div>
+  <br>
+  <div class="container-fluid mt-3">    
+    <h3>Problem Analysis</h3>
+    <div class="row"> 
+      <div class="col-lg-12 px-5"> 
+        <table class="table table-striped table-hover" id="analysis_list" name="analysis_list">
+          <thead class="table-success">
+          <tr>  
+              <td>Type</td>
+              <td>Nomor Document</td>
+              <td>Document Date</td>
+              <td>Product Name</td>
+              <td>Problem</td>
+              <!--<td>Complain Category</td>-->
+              <td>Problem Category</td>
+              <td>Description</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pa in allpa %}
+            <tr>
+              <td>{{pa.complain_type}}</td>
+              <td><a href="/complains/{{pa.complain_id}}">{{pa.nomor_document}}/{{pa.complain_type}}/{{pa.month}}/{{pa.year}}</a></td>
+              <td>{{pa.document_date}}</td>
+              <td>{{pa.product_name}}</td>
+              <td>{{pa.complain_description}}</td>
+             <!-- 
+              <td>
+                {% for article in complain.articles %}
+                  {{article.complaincategory_id}}<br>
+                {% endfor %}
+              </td>
+            -->
+              <td>{{pa.analysis_category}}</td>
+              <td>{{pa.analysis_description}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <br>  
+
+      </div>
+    </div>
+    <hr>
+    <br> 
+    <div class="row"> 
+      <div class="col-lg-12 px-5"> 
+        <h3>CAPA</h3>
+        <table class="table table-striped table-hover" id="capa_list" name="capa_list">
+          <thead class="table-success">
+          <tr>  
+              <td>Type</td>
+              <td>Nomor Document</td>
+              <td>Document Date</td>
+              <td>Product Name</td>
+              <td>Problem</td>
+              <!--<td>Complain Category</td>-->
+              <td>Corrective Action</td>
+              <td>Perventive Action</td>
+              <td>PIC</td>
+              <td>Due Date</td>
+              <td>Verifikasi</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for capa in allcapa %}
+            <tr>
+              <td>{{capa.complain_type}}</td>
+              <td><a href="/complains/{{capa.complain_id}}">{{capa.nomor_document}}/{{capa.complain_type}}/{{capa.month}}/{{capa.year}}</a></td>
+              <td>{{capa.document_date}}</td>
+              <td>{{capa.product_name}}</td>
+              <td>{{capa.complain_description}}</td>
+             <!-- 
+              <td>
+                {% for article in complain.articles %}
+                  {{article.complaincategory_id}}<br>
+                {% endfor %}
+              </td>
+            -->
+              <td>{{capa.corrective_action}}</td>
+              <td>{{capa.perventive_action}}</td>
+              <td>{{capa.pic}}</td>
+              <td>{{capa.duedate}}</td>
+              <td>{{capa.verifikasi}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <br>  
+        <br>  
+        <center><a href="/analysis/create/" class="btn btn-primary">Add New Record</a></center>  
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function(){
+      $('#analysis_list').DataTable();
+      
+      $('#capa_list').DataTable(
+        {
+          "columnDefs": [
+            { "width": "8%", "targets":8 },
+            { "width": "12%", "targets":2 }
+           ]
+        }
+      );
+    })
+    $(document).on("submit", '#filterdate', function(e){
+      e.preventDefault();
+      var periodic = $('select[name="periodic"]').val();
+      var startdate = $('input[name="startdate"]').val();
+      var enddate = $('input[name="enddate"]').val();
+      //$('table.output').empty();
+      $.ajax({
+          url: "{% url 'filteredanalysis' %}",
+          type: "GET",
+          data: { 'startdate' : startdate, 'enddate' : enddate, 'periodic' : periodic},
+          dataType: "json",
+          success: function(data) {
+            $("#analysis_list").DataTable().destroy();
+            $("#analysis_list").find("tbody").empty();
+            $('form#filterdate').trigger("reset");
+            $.each(data.filteredpalist, function(index, pa){  
+              $("#analysis_list > tbody:last-child").append(`
+                <tr>
+                  <td>${pa.complain_type}</td>
+                  <td><a href="/complains/${pa.complain_id}">${pa.nomor_document}/${pa.complain_type}/${pa.month}/${pa.year}</a></td>
+                  <td>${pa.document_date}</td>
+                  <td>${pa.product_name}</td>
+                  <td>${pa.complain_description}</td>
+                  <td>${pa.analysis_category}</td>
+                  <td>${pa.analysis_description}</td>
+                </tr>
+                `)
+            }) 
+
+            $("#capa_list").DataTable().destroy();
+            $("#capa_list").find("tbody").empty();
+            $.each(data.filteredcapalist, function(index, capa){
+              $("#capa_list > tbody:last-child").append(`
+                <tr>
+                  <td>${capa.complain_type}</td>
+                  <td><a href="/complains/${capa.complain_id}">${capa.nomor_document}/${capa.complain_type}/${capa.month}/${capa.year}</a></td>
+                  <td>${capa.document_date}</td>
+                  <td>${capa.product_name}</td>
+                  <td>${capa.complain_description}</td>
+                  <td>${capa.corrective_action}</td>
+                  <td>${capa.perventive_action}</td>
+                  <td>${capa.pic}</td>
+                  <td>${capa.duedate}</td>
+                  <td>${capa.verifikasi}</td>
+                </tr>
+                `)
+            });
+            $('#analysis_list').DataTable();
+            $('#capa_list').DataTable({
+              "columnDefs": [
+                { "width": "8%", "targets":8 },
+                { "width": "12%", "targets":2 }
+               ]
+            }); 
+          },
+          
+      });
+      return false;
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "master.html" %}
+
+{% block title %}
+  List of complains
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid"> 
+  <h5 class="mx-4">Filter</h5>
+  <form id="filterdate" name="filterdate" action="">
+    <div class="form-group row">
+      <label for="startdate" class="col-sm-2 offset-1 col-form-label">Periodic:</label> 
+      <label for="startdate" class="col-sm-2 offset-1 col-form-label">Start Date:</label> 
+      <label for="enddate" class="col-sm-2 offset-1 col-form-label">End Date:</label> 
+    </div>
+    <div class="form-group row">
+      <div class="col-sm-2 offset-1">
+        <select class="form-select" name="periodic" id="periodic" class="form-control">
+          <option value=" ">None</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="col-sm-2 offset-1">
+        <input type="date" name="startdate" id="startdate" class="form-control">
+      </div>
+      <div class="col-sm-2 offset-1">
+        <input type="date" name="enddate" id="enddate" class="form-control">
+      </div>
+      <div class="col-sm-2 offset-1">
+        <button type="submit" class="btn btn-success">Filter</button>
+      </div>
+    </div>
+  </form>
+</div>
+  <br>
+  <div class="container-fluid mt-3">   
+    <h3>Complains</h3> 
+    <div class="row">
+      <div class="col-lg-12 px-5"> 
+        <table class="table table-striped table-hover" id="complain_list" name="complain_list">
+          <thead class="table-success">
+          <tr>  
+              <td>Type</td>
+              <td>Customer Name</td>
+              <td>Nomor Document</td>
+              <td>Document Date</td>
+              <td>Product Name</td>
+              <td>Category</td>
+              <td>Notes</td>
+              <td>Status</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for complain in allcomplains %}
+            <tr>
+              <td>{{complain.complain_type}}</td>
+              <td>{{complain.customer_id}}</td>
+              <td><a href="/complains/{{complain.id}}">{{complain.nomor_document}}/{{complain.complain_type}}/{{complain.month}}/{{complain.year}}</a></td>
+              <td>{{complain.document_date}}</td>
+              <td>
+                {% for article in complain.articles %}
+                  {{article.product_id}}<br>
+                {% endfor %}
+              </td>
+              <td>
+                {% for article in complain.articles %}
+                  {{article.complaincategory_id}}<br>
+                {% endfor %}
+              </td>
+              <td>{{complain.notes}}</td>
+              <td>{{complain.status}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <br>  
+        <br>  
+        <center><a href="/complains/create/" class="btn btn-primary">Add New Record</a></center>  
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function(){
+      $('#complain_list').DataTable();
+    })
+    $(document).on("submit", '#filterdate', function(e){
+      e.preventDefault();
+      var periodic = $('select[name="periodic"]').val();
+      var startdate = $('input[name="startdate"]').val();
+      var enddate = $('input[name="enddate"]').val();
+      //$('table.output').empty();
+      $.ajax({
+          url: "{% url 'filteredcomplains' %}",
+          type: "GET",
+          data: { 'startdate' : startdate, 'enddate' : enddate, 'periodic' : periodic},
+          dataType: "json",
+          success: function(data) {
+            $("#complain_list").DataTable().destroy();
+            $("#complain_list").find("tbody").empty();
+            $('form#filterdate').trigger("reset");
+            $.each(data.filteredcomplains, function(index, complains){
+              var product_id = ""
+              var category = ""  
+              $.each(complains.articles, function(i, article){
+                product_id += article.product_id + "<br>"
+                category += article.complaincategory_id + "<br>"
+              })
+              $("#complain_list > tbody:last-child").append(`
+                <tr>
+                  <td>${complains.complain_type}</td>
+                  <td>${complains.customer_id}</td>
+                  <td><a href="/complains/${complain.id}">${complains.nomor_document}/${complains.complain_type}/${complains.month}/${complains.year}</a></td>
+                  <td>${complains.document_date}</td>
+                  <td>${product_id}</td>
+                  <td>${category}</td>
+                  <td>${complains.notes}</td>
+                  <td>${complains.status}</td>
+                </tr>
+                `)
+            });
+            $('#complain_list').DataTable(); 
+          },
+          
+      });
+      return false;
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,462 @@
+{% extends "master.html" %}
+
+{% block title %}
+  Complain ID
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="container">  
+                <br>  
+                <!--Radio-->
+                <label class="col-form-label offset-2" style="font-weight:bold">Complain Type: </label>  
+                <div class="col-sm-10 offset-2">  
+                    <p>{{complain.complain_type}}</p>
+                </div>                   
+                <label class="col-form-label offset-2" style="font-weight:bold">Customer Name: </label>  
+                <div class="col-sm-10 offset-2">  
+                    <p>{{complain.customer_id}}</p>
+                </div>              
+                <label class="col-form-label offset-2" style="font-weight:bold">Nomor Dokumen: </label>  
+                <div class="col-sm-10 offset-2">   
+                    <p>{{complain.nomor_document}}/{{complain.complain_type}}/{{complain.month}}/{{complain.year}}</p>
+                </div>
+                  
+                <label class="col-form-label offset-2" style="font-weight:bold">Document Date: </label>  
+                <div class="col-sm-10 offset-2">  
+                    <p>{{complain.document_date}}</p> 
+                </div>  
+                <label class="col-form-label offset-2" style="font-weight:bold">Notes: </label>  
+                <div class="col-sm-10 offset-2">
+                    <p>{{complain.notes}}</p>  
+                </div>  
+
+                <label class="col-form-label offset-2" style="font-weight:bold">Status: </label>  
+                <div class="col-sm-10 offset-2">
+                    <p>{{complain.status}}</p>    
+                </div>   
+                <a href="/complains">Back</a>
+            </div>  
+        </div>
+        <div class="col-md-9 px-5">
+            <h3>Complains</h3>
+            <table id="detailTable" class="table table-striped pb-3">
+                <thead  class="table-success">
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Process</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        {% if access == 1 %}
+                        <th style="width:10%">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr id="detail-{{article.id}}">
+                            <td class="product_name detail_data" name="product_name" id="product_name"> {{article.product_name}} </td>
+                            <td class="process_name detail_data" name="process_name" id="process_name"> {{article.process_name}} </td>
+                            <td class="complain_category detail_data" name="complain_category" id="complain_category"> {{article.complain_category}} </td>
+                            <td class="complain_description detail_data" name="complain_description" id="complain_description"> {{article.complain_description}} </td>
+                            <td class="quantity detail_data" name="quantity" id="quantity"> {{article.quantity}} </td>
+                            <td class="status detail_data" name="status" id="status"> {{article.status}} </td>
+                            {% if access == 1 %}
+                            <td>
+                                <button class="btn btn-success form-control" onClick="editDetail({{article.id}})" data-toggle="modal" data-target="#detailModal">EDIT</button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h3 class="pt-3">Problem Analysis</h3>
+            <table id="paTable" class="table table-striped pb-3">
+                <thead class="table-success">
+                    <tr>
+                        <th>Problem</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        {% if access == 1 %}
+                        <th style="width:10%">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pa in allpa %}
+                        <tr id="pa-{{pa.id}}">
+                            <td class="complain_description_pa pa_data" name="complain_description_pa" id="complain_description_pa">{{pa.complain_description}}</td>
+                            <td class="analysis_category pa_data" name="analysis_category" id="analysis_category"> {{pa.analysis_category}} </td>
+                            <td class="analysis_description pa_data" name="analysis_description" id="analysis_description"> {{pa.analysis_description}} </td>
+                            {% if access == 1 %}\
+                            <td>
+                                <button class="btn btn-success form-control" onClick="editAnalysis({{pa.id}})" data-toggle="modal" data-target="#analysisModal">EDIT</button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h3 class="pt-3">CAPA</h3>
+            <table id="capaTable" class="table table-striped pb-3">
+                <thead class="table-success">
+                    <tr>
+                        <th>Problem</th>
+                        <th>Corrective Action</th>
+                        <th>Perventive Action</th>
+                        <th>PIC</th>
+                        <th style="width:12%">Due Date</th>
+                        <th>Verifikasi</th>
+                        {% if access == 1 %}
+                        <th style="width:10%">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for capa in allcapa %}
+                        <tr id="capa-{{capa.id}}">
+                            <td class="complain_description_capa capa_data" name="complain_description_capa" id="complain_description_capa"> {{capa.complain_description}} </td>
+                            <td class="corrective_action capa_data" name="corrective_action" id="corrective_action"> {{capa.corrective_action}} </td>
+                            <td class="perventive_action capa_data" name="perventive_action" id="perventive_action"> {{capa.perventive_action}} </td>
+                            <td class="pic capa_data" name="pic" id="pic"> {{capa.pic}} </td>
+                            <td class="duedate capa_data" name="duedate" id="duedate"> {{capa.duedate}} </td>
+                            <td class="verifikasi capa_data" name="verifikasi" id="verifikasi">{{capa.verifikasi}}</td>
+                            {% if access == 1 %}
+                            <td>
+                                <button class="btn btn-success form-control" onClick="editCapa({{capa.id}})" data-toggle="modal" data-target="#capaModal">EDIT</button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal" name="detailModal" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
+          <h4 class="modal-title" id="detailModalLabel">Update Details</h4>
+        </div>
+        <form id="updatedetails" action="">
+        <div class="modal-body">
+            <input class="form-control" id="detail_id" type="hidden" name="detail_id" value="">
+            <label for="product_id">Product ID</label>
+            <select class="w-100" data-live-search="true" name="ud_product_name" id="ud_product_name">
+                {% for product in companyproducts %}
+                    <option value="{{product.name}}">{{product.name}} | ID: {{product.id}}</option>
+                {% endfor %}
+            
+            </select>
+            <label for="process_name">Process</label>
+            <select class="w-100" data-live-search="true" name="ud_process_name" id="ud_process_name">
+                {% for process in allprocesses %}
+                    <option value="{{process}}">{{process}}</option>
+                {% endfor %}
+            </select>
+            <label for="complaincategory_id">Category</label>
+            <select class="w-100" data-live-search="true" name="ud_complain_category" id="ud_complain_category">
+                {% for category in allcategories %}
+                    <option value="{{category.name}}">{{category.name}}</option>
+                {% endfor %}
+            </select>
+            <label for="complain_description">Description</label>
+            <textarea class="form-control" type="text" name="ud_complain_description" id="ud_complain_description" autocomplete="off" required></textarea>
+
+            <label for="quantity">Quantity</label>
+            <input class="form-control" type="text" name="ud_quantity" id="ud_quantity" autocomplete="off" required value="12">
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" >Save Changes</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+        </form>
+        </div>
+    </div>
+</div>
+<div class="modal" name="analysisModal" id="analysisModal" tabindex="-1" role="dialog" aria-labelledby="analysisModalLabel" >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
+          <h4 class="modal-title" id="analysisModalLabel">Update Analysis</h4>
+        </div>
+        <form id="updateproblemanalysis" action="">
+        <div class="modal-body">
+            <input class="form-control" id="id" type="hidden" name="analysis_id" value="">
+            <label for="ud_complain_description_pa">Complain Description</label>
+            <select class="w-100" name="ud_complain_description_pa" id="ud_complain_description_pa">
+                {% for article in articles %}
+                <option value="{{article.complain_description}}">{{article.complain_description}}</option>
+                {% endfor %}
+            </select>
+            <label for="ud_analysis_category">Category</label>
+            <select class="w-100" data-live-search="true" name="ud_analysis_category" id="ud_analysis_category">
+                {% for category in analysis_categories %}
+                    <option value="{{category}}">{{category}}</option>
+                {% endfor %}
+            </select>
+            <label for="ud_analysis_description">Description</label>
+            <textarea class="form-control" type="text" name="ud_analysis_description" id="ud_analysis_description" required></textarea>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" >Save Changes</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+        </form>
+        </div>
+    </div>
+</div>
+<div class="modal" name="capaModal" id="capaModal" tabindex="-1" role="dialog" aria-labelledby="capaModalLabel" >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
+          <h4 class="modal-title" id="capaModalLabel">Update Capa</h4>
+        </div>
+        <form id="updateCapa" action="">
+        <div class="modal-body">
+            <input class="form-control" id="id" type="hidden" name="id" value="">
+            <label for="ud_complain_description_capa">Complain Description</label>
+            <select class="w-100" name="ud_complain_description_capa" id="ud_complain_description_capa">
+                {% for article in articles %}
+                <option value="{{article.complain_description}}">{{article.complain_description}}</option>
+                {% endfor %}
+            </select>
+            <label for="ud_corrective_action">Corrective Action</label>
+            <input class="form-control" type="text" name="ud_corrective_action" id="ud_corrective_action" required>
+
+            <label for="ud_perventive_action">Perventive Action</label>
+            <input class="form-control" type="text" name="ud_perventive_action" id="ud_perventive_action" required>
+
+            <label for="ud_pic">PIC</label>
+            <input class="form-control" type="text" name="ud_pic" id="ud_pic" required>
+
+            <label for="ud_duedate">Due Date</label>
+            <input class="form-control" type="date" name="ud_duedate" id="ud_duedate" min="2000-01-02" required>
+
+            <label for="ud_duedate">Verifikasi</label>
+            <input class="form-control" type="number" min="0" max="1" name="ud_verifikasi" id="ud_verifikasi" min="2000-01-02" required>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+        </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+       $('select').selectpicker();
+       })
+       $(document).on('submit', '#updatedetails', function(e) {
+        e.preventDefault()
+        var id = $('input[name="detail_id"]').val();
+        var product_name = $('select[name="ud_product_name"]').val().trim();
+        var process_name = $('select[name="ud_process_name"]').val().trim();
+        var category = $('select[name="ud_complain_category"]').val().trim();
+        var description = $('textarea[name="ud_complain_description"]').val();
+        var quantity = $('input[name="ud_quantity"]').val();
+            // Create Ajax Call
+        $.ajax({
+            type: 'GET',
+            url: '{% url "updatedetails" %}',
+            data: {
+            'id': id,
+            'product_name' : product_name,
+            'process_name' : process_name,
+            'complain_category' : category,
+            'complain_description' : description,
+            'quantity' : quantity,
+            'updatetype':'afterdb',
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.detail) {   
+                updateDetail(data.detail);
+                }
+            }
+        });
+        $('.modal').modal().hide();
+        $(".modal-backdrop").remove()
+        $('form#updatedetails').trigger("reset");
+        return false;
+    });
+
+    function editDetail(id) {
+        tr_id = "#detail-" + id;
+        product_name = jQuery.trim($(tr_id).find(".product_name").text());
+        process_name = jQuery.trim($(tr_id).find(".process_name").text());
+        complain_category = jQuery.trim($(tr_id).find(".complain_category").text());
+        complain_description = $(tr_id).find(".complain_description").text();
+        quantity = $(tr_id).find(".quantity").text();
+        alert(id)
+        $('input[name="detail_id"]').val(id);
+        $('select[name="ud_product_name"]').val(product_name).change();
+        $('select[name="ud_process_name"]').val(process_name).change();
+        $('select[name="ud_complain_category"]').val(complain_category).change();
+        $('textarea#ud_complain_description').val(complain_description);
+        $('input[name="ud_quantity"]').val(quantity);
+        $('select').selectpicker("refresh");
+        }
+    
+    function updateDetail(detail){
+        $("#detailTable #detail-" + detail.temp_id).children(".detail_data").each(function() {
+            var attr = $(this).attr("name");
+            if (attr == "product_name") {
+            $(this).text(detail.product_name);
+            } else if (attr == "process_name") {
+            $(this).text(detail.process_name);
+            } else if (attr == "complaincategory_id"){
+            $(this).text(detail.complaincategory_id);
+            } else if (attr == "complain_description"){
+            $(this).text(detail.complain_description);
+            } else if (attr == "quantity"){
+            $(this).text(detail.quantity);
+            }
+        });
+    }
+
+    
+    $(document).on('submit', '#updateproblemanalysis', function(e) {
+        e.preventDefault();
+        var complain_description_pa = $('select[name="ud_complain_description_pa"]').val().trim();
+        var analysis_category = $('select[name="ud_analysis_category"]').val().trim();
+        var analysis_description = $('textarea[name="ud_analysis_description"]').val().trim();
+        var id = $('input[name="analysis_id"]').val();
+            // Create Ajax Call
+        $.ajax({
+            type: 'GET',
+            url: '{% url "updateproblemanalysis" %}',
+            data: {
+            'id': id,
+            'complain_description_pa' : complain_description_pa,
+            'analysis_category' : analysis_category,
+            'analysis_description' : analysis_description,
+            'updatetype':"afterdb",
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.detail) {   
+                updateAnalysis(data.detail);
+                }
+            }
+        });
+        $('.modal').modal().hide();
+        $(".modal-backdrop").remove()
+        $('form#updateproblemanalysis').trigger("reset");
+        return false;
+    });
+
+    function editAnalysis(id) {
+        tr_id = "#pa-" + id;
+        complain_description_pa = jQuery.trim($(tr_id).find(".complain_description_pa").text());
+        analysis_category = jQuery.trim($(tr_id).find(".analysis_category").text());
+        analysis_description = $(tr_id).find(".analysis_description").text();
+        $('input[name="analysis_id"]').val(id);
+        $('select[name="ud_complain_description_pa"]').val(complain_description_pa).change();
+        $('select[name="ud_analysis_category"]').val(analysis_category).change();
+        $('textarea#ud_analysis_description').val(analysis_description);
+        $('select').selectpicker("refresh");
+        }
+
+    
+    function updateAnalysis(detail){
+        $("#paTable #pa-" + detail.temp_id).children(".pa_data").each(function() {
+            var attr = $(this).attr("name");
+            if (attr == "complain_description_pa") {
+                $(this).text(detail.complain_description_pa);
+            } else if (attr == "analysis_category") {
+                $(this).text(detail.analysis_category);
+            } else if (attr == "analysis_description"){
+                $(this).text(detail.analysis_description);
+            }
+        });
+    }
+    
+    $(document).on('submit', '#updateCapa', function(e) {
+        e.preventDefault()
+        var complain_description_capa = $('select[name="ud_complain_description_capa"]').val().trim();
+        var corrective_action = $('input[name="ud_corrective_action"]').val().trim();
+        var perventive_action = $('input[name="ud_perventive_action"]').val().trim();
+        var pic = $('input[name="ud_pic"]').val();
+        var duedate = $('input[name="ud_duedate"]').val();
+        var verifikasi = $('input[name="ud_verifikasi"]').val();
+        var id = $('input[name="id"]').val();
+            // Create Ajax Call
+        $.ajax({
+            type: 'GET',
+            url: '{% url "updatecapa" %}',
+            data: {
+            'id': id,
+            'complain_description_capa' : complain_description_capa,
+            'corrective_action' : corrective_action,
+            'perventive_action' : perventive_action,
+            'pic' : pic,
+            'duedate' : duedate,
+            'verifikasi' : verifikasi,
+            'updatetype': "afterdb",
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.detail) {   
+                updateCapa(data.detail);
+                }
+            }
+        });
+        $('.modal').modal().hide();
+        $(".modal-backdrop").remove()
+        $('form#updatecapa').trigger("reset");
+        return false;
+    });
+
+    function editCapa(id) {
+        tr_id = "#capa-" + id;
+        complain_description_capa = jQuery.trim($(tr_id).find(".complain_description_capa").text());
+        corrective_action = $(tr_id).find(".corrective_action").text();
+        perventive_action = $(tr_id).find(".perventive_action").text();
+        pic = $(tr_id).find(".pic").text();
+        duedate = jQuery.trim($(tr_id).find(".duedate").text());
+        verifikasi = $(tr_id).find(".verifikasi").text();
+        $('input#id').val(id);
+        $('select[name="ud_complain_description_capa"]').val(complain_description_capa).change();
+        $('input#ud_corrective_action').val(corrective_action);
+        $('input#ud_perventive_action').val(perventive_action);
+        $('input#ud_pic').val(pic);
+        $('input#ud_duedate').val(duedate);
+        $('input#ud_verifikasi').val(verifikasi);
+        $('select').selectpicker("refresh");
+        }
+    
+    function updateCapa(detail){
+        $("#capaTable #capa-" + detail.temp_id).children(".capa_data").each(function() {
+            var attr = $(this).attr("name");
+            if (attr == "complain_description_capa") {
+                $(this).text(detail.complain_description_capa);
+            } else if (attr == "corrective_action") {
+            $(this).text(detail.corrective_action);
+            } else if (attr == "perventive_action"){
+            $(this).text(detail.perventive_action);
+            } else if (attr == "pic"){
+            $(this).text(detail.pic);
+            } else if (attr == "duedate"){
+            $(this).text(detail.duedate);
+            } else if (attr == "verifikasi") {
+            $(this).text(detail.verifikasi);
+            }
+        });
+    }
+</script>
+{% endblock %}

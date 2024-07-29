@@ -1,0 +1,279 @@
+{% extends "master.html" %}
+
+{% block title %}
+  Create Details
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+    <p id="details"></p>
+    <div class="row pb-4">
+        <div class="col-md-7" style="margin-left: -50px;">
+            <form class="post-form" id="add_details" action="/complains/create/details/temp"> 
+
+            {% csrf_token %}  
+            <div class="container">  
+                <br>  
+                <div class="form-group row pb-4">  
+                    <label class="col-sm-1 col-form-label"></label>  
+                    <div class="col-sm-9">  
+                        <h3>Enter Complaint Details</h3>
+                    </div>  
+                </div>  
+                <div class="form-group row pb-4">  
+                    <!--Radio-->
+                    <label class="col-sm-2 col-form-label">Product: </label>  
+                    <div class="col-sm-9">  
+                    <select class=" selectpicker w-100" data-live-search="true" name="product_name">
+                        {% for product in companyproducts %}
+                        <option value="{{product.name}}">{{product.name}} | ID: {{product.id}}</option>
+                        {% endfor %}
+                    </select>
+                    </div>  
+                </div>  
+                <div class="form-group row pb-4"> 
+                    <label class="col-sm-2 col-form-label">Process: </label>  
+                    <div class="col-sm-9">  
+                        <select class="selectpicker w-100" data-live-search="true" name="process_name">
+                            {% for process in allprocesses %}
+                                <option value="{{process}}">{{process}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>  
+                </div>  
+                    <div class="form-group row pb-4">  
+                    <label class="col-sm-2 col-form-label">Category: </label>  
+                    <div class="col-sm-9">  
+                    <select class="selectpicker w-100" data-live-search="true" name="complain_category">
+                        {% for category in allcategories %}
+                            <option value="{{category.name}}">{{category.name}}</option>
+                        {% endfor %}
+                    </select>
+                    </div>  
+                </div>
+                <div class="form-group row pb-4">  
+                    <label class="col-sm-2 col-form-label">Description: </label>  
+                    <div class="col-sm-9">  
+                        <textarea class="form-control" type="text" name="complain_description" id="complain_description" autocomplete="off" required></textarea>  
+                    </div>  
+                </div>
+                <div class="form-group row pb-4">  
+                    <label class="col-sm-2 col-form-label">Quantity: </label>  
+                    <div class="col-sm-9">  
+                        <input class="form-control" type="number" min="0" name="quantity" id="quantity" autocomplete="off" required>  
+                    </div>  
+                </div>               
+                <div class="form-group row pb-4">  
+                    <label class="col-sm-1 col-form-label"></label>  
+                    <div class="col-sm-4">  
+                        <button type="submit" class="btn btn-primary">Submit</button>  
+                    </div>  
+                </div>  
+            </div>  
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 offset-1">
+            <h3>COMPLAINTS</h3>
+            <table id="detailTable" class="table table-striped">
+            <tr>
+                <th>Product Name</th>
+                <th>Process</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th colspan="2">Actions</th>
+            </tr>
+            </table>
+            <form method="POST" class="post-form" action="/complains/save/">
+                {% csrf_token %}  
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div class="modal" name="myModal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
+              <h4 class="modal-title" id="myModalLabel">Update Details</h4>
+            </div>
+            <form id="updatedetails" action="">
+            <div class="modal-body">
+                <input class="form-control" id="id" type="hidden" name="id" value="">
+                <label for="product_id">Product ID</label>
+                <select class=" selectpicker w-100" data-live-search="true" name="ud_product_name" id="ud_product_name">
+                    {% for product in companyproducts %}
+                    <option value="{{product.name}}">{{product.name}} | ID: {{product.id}}</option>
+                    {% endfor %}
+                </select>
+                <label for="process_name">Process</label>
+                <select class="selectpicker w-100" data-live-search="true" name="ud_process_name" id="ud_process_name">
+                    {% for process in allprocesses %}
+                        <option value="{{process}}">{{process}}</option>
+                    {% endfor %}
+                </select>
+                <label for="ud_complain_category">Category</label>
+                <select class="selectpicker w-100" data-live-search="true" name="ud_complain_category" id="ud_complain_category">
+                    {% for category in allcategories %}
+                        <option value="{{category.name}}">{{category.name}}</option>
+                    {% endfor %}
+                </select>
+                <label for="complain_description">Description</label>
+                <textarea class="form-control" type="text" name="ud_complain_description" id="ud_complain_description" autocomplete="off" required></textarea>
+
+                <label for="quantity">Quantity</label>
+                <input class="form-control" type="number" min="0" name="ud_quantity" id="ud_quantity" autocomplete="off" required>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" >Save Changes</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('.selectpicker').selectpicker();
+       })
+    // Create Django Ajax Call
+    $(document).on('submit', '#add_details', function(e) {
+        e.preventDefault();
+        var product_name = $('select[name="product_name"]').val().trim();
+        var process_name = $('select[name="process_name"]').val();
+        var category = $('select[name="complain_category"]').val().trim();
+        var description = $('textarea[name="complain_description"]').val();
+        var quantity = $('input[name="quantity"]').val();
+        $.ajax({
+            type: 'GET',
+            url: '{% url "createdetails" %}',
+            data: {
+                'product_name' : product_name,
+                'process_name' : process_name,
+                'complain_category' : category,
+                'complain_description' : description,
+                'quantity' : quantity,
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.temp_detail) {
+                appendToUsrTable(data.temp_detail);
+                }
+            },
+        });
+        $('form#add_details').trigger("reset");
+        return false;
+    });
+    
+    function appendToUsrTable(temp_detail) {
+    $("#detailTable > tbody:last-child").append(`
+            <tr id="complain-${temp_detail.temp_id}">
+                <td class="product_name detail_data" name="product_name" id="product_name">${temp_detail.product_name}</td>
+                <td class="process_name detail_data" name="process_name" id="process_name">${temp_detail.process_name}</td>
+                <td class="complain_category detail_data" name="complain_category" id="complain_category">${temp_detail.complain_category}</td>
+                <td class="complain_description detail_data" name="complain_description" id="complain_description">${temp_detail.complain_description}</td>
+                <td class="quantity detail_data" name="quantity" id="quantity">${temp_detail.quantity}</td>
+                <td align="center">
+                    <button class="btn btn-success form-control" onClick="editDetail(${temp_detail.temp_id})" data-toggle="modal" data-target="#myModal">EDIT</button>
+                </td>
+                <td align="center">
+                    <button class="btn btn-danger form-control" onClick="deleteDetail(${temp_detail.temp_id})">DELETE</button>
+                </td>
+            </tr>
+        `);
+    }
+
+    $(document).on('submit', '#updatedetails', function(e) {
+        e.preventDefault()  
+        var product_name = $('select[name="ud_product_name"]').val().trim();
+        var process_name = $('select[name="ud_process_name"]').val().trim();
+        var category = $('select[name="ud_complain_category"]').val().trim();
+        var description = $('textarea[name="ud_complain_description"]').val().trim();
+        var quantity = $('input[name="ud_quantity"]').val();
+        var id = $('input[name="id"]').val();
+            // Create Ajax Call
+        $.ajax({
+            type: 'GET',
+            url: '{% url "updatedetails" %}',
+            data: {
+            'id': id,
+            'product_name' : product_name,
+            'process_name' : process_name,
+            'complain_category' : category,
+            'complain_description' : description,
+            'quantity' : quantity,
+            'updatetype' : "beforedb",
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.detail) {   
+                updateToUserTabel(data.detail);
+                }
+            }
+        });
+        $('.modal').modal().hide();
+        $(".modal-backdrop").remove()
+        $('form#updatedetails').trigger("reset");
+        return false;
+    });
+
+    function editDetail(id) {
+        
+        tr_id = "#complain-" + id;
+        product_name = jQuery.trim($(tr_id).find(".product_name").text());
+        process_name = jQuery.trim($(tr_id).find(".process_name").text());
+        complain_category = jQuery.trim($(tr_id).find(".complain_category").text());
+        complain_description = $(tr_id).find(".complain_description").text();
+        quantity = $(tr_id).find(".quantity").text();
+        
+        $('input[name="id"]').val(id);
+        $('select[name="ud_product_name"]').val(product_name).change();
+        $('select[name="ud_process_name"]').val(process_name).change();
+        $('select[name="ud_complain_category"]').val(complain_category).change();
+        $('textarea#ud_complain_description').val(complain_description);
+        $('input[name="ud_quantity"]').val(quantity);
+        $('.selectpicker').selectpicker("refresh");
+        }
+    
+    function updateToUserTabel(detail){
+        $("#detailTable #complain-" + detail.temp_id).children(".detail_data").each(function() {
+            var attr = $(this).attr("name");
+            if (attr == "product_name") {
+            $(this).text(detail.product_name);
+            } else if (attr == "process_name") {
+            $(this).text(detail.process_name);
+            } else if (attr == "complain_category"){
+            $(this).text(detail.complain_category);
+            } else if (attr == "complain_description"){
+            $(this).text(detail.complain_description);
+            } else if (attr == "quantity"){
+            $(this).text(detail.quantity);
+            }
+        });
+    }
+
+    function deleteDetail(id) {
+        var action = confirm("Are you sure you want to delete this user?");
+        if (action != false) {
+          $.ajax({
+              url: '{% url "deletedetails" %}',
+              data: {
+                  'id': id,
+              },
+              dataType: 'json',
+              success: function (data) {
+                  if (data.deleted) {
+                    $("#detailTable #complain-" + id).remove();
+                  }
+              }
+          });
+        }
+      }
+</script>
+{% endblock %}

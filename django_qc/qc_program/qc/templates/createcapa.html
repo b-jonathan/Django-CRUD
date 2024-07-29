@@ -1,0 +1,253 @@
+{% extends "master.html" %}
+
+{% block title %}
+Create CAPA
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 pb-5 pt-3">
+            <form class="post-form" id="add_capa" action=""> 
+            {% csrf_token %}  
+            <div class="container bg-success-subtle rounded-5">  
+                <br>  
+                <div class="form-group row">   
+                    <div class="col-sm-11 offset-1">  
+                        <h3>Enter Capa</h3>
+                    </div>  
+                </div>  
+                <div class="form-group row">  
+                    <!--Radio-->
+                    <label class="col-sm-2 col-form-label">Problem Description &ensp;: </label>  
+                    <div class="col-sm-10 mb-4">  
+                    <select class="form-select" type="number" name="complain_detail_capa" required>
+                        {% for detail in complain_details %}
+                        <option value="{{detail.id}}">{{detail.complain_description}}</option>
+                        {% endfor %}
+                    </select>
+                    </div>  
+                </div>  
+                <div class="form-group row"> 
+                    <label class="col-sm-2 col-form-label">Corrective Action&emsp;&emsp; : </label>  
+                    <div class="col-sm-10">  
+                        <textarea class="form-control mb-4" type="text" name="corrective_action" autocomplete="off" required></textarea>
+                    </div>  
+                </div>  
+                <div class="form-group row">  
+                    <label class="col-sm-2 col-form-label">Perventive Action&emsp;&emsp;: </label>  
+                    <div class="col-sm-10">  
+                    <textarea class="form-control mb-4" type="text" name="perventive_action" row="2"></textarea>
+                    </div>  
+                </div>        
+                <div class="form-group row">  
+                    <!--Radio-->
+                    <label class="col-sm-2 col-form-label">PIC&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; : </label>  
+                    <div class="col-sm-2 ">  
+                    <input class="form-control mb-4" type="text" name="pic">
+                    </div>  
+                    <label class="col-sm-1 col-form-label">Due Date: </label>  
+                    <div class="col-sm-2">  
+                    <input class="form-control mb-2" type="date" name="duedate">
+                    </div> 
+                </div>      
+                <div class="form-group row">    
+                    <div class="col-sm-10 offset-2 mb-2">  
+                        <button type="submit" class="btn btn-primary">Add</button>  
+                    </div>  
+                </div>  
+            </div>  
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 offset-1 ">
+            <h3>COMPLAINTS</h3>
+            <table id="capaTable" class="table table-striped">
+            <tr>
+                <th>Complain Detail ID</th>
+                <th>Corrective Action</th>
+                <th>Perventive Action</th>
+                <th>PIC</th>
+                <th>Due Date</th>
+                <th colspan="2">Actions</th>
+            </tr>
+            </table>
+            <form method="POST" class="post-form" action="/analysis/save/">
+                {% csrf_token %}  
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div class="modal" name="myModal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
+              <h4 class="modal-title" id="myModalLabel">Update Capa</h4>
+            </div>
+            <form id="updateCapa" action="">
+            <div class="modal-body">
+                <input class="form-control" id="id" type="hidden" name="id" value="">
+                <label for="ud_complain_detail_capa">Complain Detail ID</label>
+                <select class="form-select" name="ud_complain_detail_capa" id="ud_complain_detail_capa" list="complaindetaillist">
+                    {% for detail in complain_detail_capas %}
+                    <option value="{{detail.id}}">{{detail.complain_description}}</option>z
+                    {% endfor %}
+                </select>
+                <label for="ud_corrective_action">Corrective Action</label>
+                <input class="form-control" type="text" name="ud_corrective_action" id="ud_corrective_action" list="categorylist">
+
+                <label for="ud_perventive_action">Perventive Action</label>
+                <input class="form-control" type="text" name="ud_perventive_action" id="ud_perventive_action">
+
+                <label for="ud_pic">PIC</label>
+                <input class="form-control" type="text" name="ud_pic" id="ud_pic">
+
+                <label for="ud_duedate">Due Date</label>
+                <input class="form-control" type="date" name="ud_duedate" id="ud_duedate">
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" >Save Changes</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Create Django Ajax Call
+    $(document).on('submit', '#add_capa', function(e) {
+        e.preventDefault();
+        var complain_detail_capa = $('select[name="complain_detail_capa"]').val().trim();
+        var corrective_action = $('textarea[name="corrective_action"]').val().trim();
+        var perventive_action = $('textarea[name="perventive_action"]').val();
+        var pic = $('input[name="pic"]').val();
+        var duedate = $('input[name="duedate"]').val();
+        $.ajax({
+            type: 'GET',
+            url: '{% url "createcapa" %}',
+            data: {
+                'complain_detail_capa' : complain_detail_capa,
+                'corrective_action' : corrective_action,
+                'perventive_action' : perventive_action,
+                'pic': pic,
+                'duedate': duedate,
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.temp_capa) {
+                appendCapa(data.temp_capa);
+                }
+            },
+        });
+        $('form#add_capa').trigger("reset");
+        return false;
+    });
+    
+    function appendCapa(temp_capa) {
+    $("#capaTable > tbody:last-child").append(`
+            <tr id="capa-${temp_capa.temp_id}">
+                <td class="complain_detail_capa detail_data" name="complain_detail_capa" id="complain_detail_capa">${temp_capa.complaindetail_id}</td>
+                <td class="corrective_action detail_data" name="corrective_action" id="corrective_action">${temp_capa.corrective_action}</td>
+                <td class="perventive_action detail_data" name="perventive_action" id="perventive_action">${temp_capa.perventive_action}</td>
+                <td class="pic detail_data" name="pic" id="pic">${temp_capa.pic}</td>
+                <td class="duedate detail_data" name="duedate" id="duedate">${temp_capa.duedate}</td>
+                <td>
+                    <button class="btn btn-success form-control" onClick="editCapa(${temp_capa.temp_id})" data-toggle="modal" data-target="#myModal">EDIT</button>
+                </td>
+                <td align="center">
+                    <button class="btn btn-danger form-control" onClick="deleteCapa(${temp_capa.temp_id})">DELETE</button>
+                </td>
+            </tr>
+        `);
+    }
+
+    $(document).on('submit', '#updateCapa', function(e) {
+        e.preventDefault()
+        var complain_detail_capa = $('select[name="ud_complain_detail_capa"]').val().trim();
+        var corrective_action = $('input[name="ud_corrective_action"]').val().trim();
+        var perventive_action = $('input[name="ud_perventive_action"]').val().trim();
+        var pic = $('input[name="ud_pic"]').val();
+        var duedate = $('input[name="ud_duedate"]').val();
+        var id = $('input[name="id"]').val();
+            // Create Ajax Call
+        $.ajax({
+            type: 'GET',
+            url: '{% url "updatecapa" %}',
+            data: {
+            'id': id,
+            'complain_detail_capa' : complain_detail_capa,
+            'corrective_action' : corrective_action,
+            'perventive_action' : perventive_action,
+            'pic' : pic,
+            'duedate' : duedate,
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.detail) {   
+                updateCapa(data.detail);
+                }
+            }
+        });
+        $('.modal').modal().hide();
+        $(".modal-backdrop").remove()
+        $('form#updatecapa').trigger("reset");
+        return false;
+    });
+
+    function editCapa(id) {
+        tr_id = "#capa-" + id;
+        complain_detail_capa = $(tr_id).find(".complain_detail_capa").text();
+        corrective_action = $(tr_id).find(".corrective_action").text();
+        perventive_action = $(tr_id).find(".perventive_action").text();
+        pic = $(tr_id).find(".pic").text();
+        duedate = $(tr_id).find(".duedate").text();
+        $('input#id').val(id);
+        $('input#ud_complain_detail_capa').val(complain_detail_capa);
+        $('input#ud_corrective_action').val(corrective_action);
+        $('input#ud_perventive_action').val(perventive_action);
+        $('input#ud_pic').val(pic);
+        $('input#ud_duedate').val(duedate);
+        }
+    
+    function updateCapa(detail){
+        $("#capaTable #capa-" + detail.temp_id).children(".detail_data").each(function() {
+            var attr = $(this).attr("name");
+            if (attr == "complain_detail_capa") {
+            $(this).text(detail.complain_detail_capa);
+            } else if (attr == "corrective_action") {
+            $(this).text(detail.corrective_action);
+            } else if (attr == "perventive_action"){
+            $(this).text(detail.perventive_action);
+            } else if (attr == "pic"){
+            $(this).text(detail.pic);
+            } else if (attr == "duedate"){
+            $(this).text(detail.duedate);
+            }
+        });
+    }
+
+    function deleteCapa(id) {
+        var action = confirm("Are you sure you want to delete this capa?");
+        if (action != false) {
+          $.ajax({
+              url: '{% url "deletecapa" %}',
+              data: {
+                  'id': id,
+              },
+              dataType: 'json',
+              success: function (data) {
+                  if (data.deleted) {
+                    $("#capaTable #capa-" + id).remove();
+                  }
+              }
+          });
+        }
+      }
+</script>
+{% endblock %}
